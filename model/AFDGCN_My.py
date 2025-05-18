@@ -369,8 +369,8 @@ class GPR_prop(MessagePassing):
 class GPRGNN(torch.nn.Module):
     def __init__(self, num_node, input_dim, output_dim, hidden, cheb_k, num_layers, embed_dim):
         super(GPRGNN, self).__init__()
-        self.lin1 = Linear(512, 64)  # (input_dim, hidden) 19, 1
-        self.lin2 = Linear(64, 512)
+        self.lin1 = Linear(384, 64)  # (input_dim, hidden) 19, 1
+        self.lin2 = Linear(64, 384)
 
         self.prop1 = GPR_prop(cheb_k, 0.5, 'PPR', None)
 
@@ -407,7 +407,7 @@ class GPRGNN(torch.nn.Module):
             x = x.transpose(0, 1)
 
             # Reshape it from (5, 1216) to (5, 1, 19, 64)
-            x = x.view(x.size(0), 1, 8, 64)  # Manually reshape to (5, 1, 19, 64)
+            x = x.view(x.size(0), 1, 6, 64)  # Manually reshape to (5, 1, 19, 64)
 
             # Apply log softmax along the appropriate dimension
             x = F.log_softmax(x, dim=3)  # Assuming the last dimension (64) is the one to apply softmax to
@@ -531,8 +531,8 @@ class APPNP(MessagePassing):
 class APPNP_Net(torch.nn.Module):
     def __init__(self, num_node, input_dim, output_dim, hidden, cheb_k, num_layers, embed_dim):
         super(APPNP_Net, self).__init__()
-        self.lin1 = Linear(19648, 64)  # (512, 64) for Konya & (1216,64) for Kcetas
-        self.lin2 = Linear(64, 19648)
+        self.lin1 = Linear(384, 64)  # (512, 64) for Konya & (1216,64) for Kcetas & (384,64) for Kayseri & (19648, 64) for PEMS
+        self.lin2 = Linear(64, 384)
         self.prop1 = APPNP(cheb_k, 0.5, 0.2, False, True, True)
         self.dropout = 0.2
         self.num_layers = num_layers
@@ -572,7 +572,7 @@ class APPNP_Net(torch.nn.Module):
         x = x.transpose(0, 1)
         # Reshape it from (5, 1216) to (5, 1, 19, 64) for Kcetas
         # (5, 1, 8, 64) for Konya
-        x = x.reshape(x.size(0), 1, 307, 64)  # Manually reshape to (5, 1, 19, 64)
+        x = x.reshape(x.size(0), 1, 6, 64)  # Manually reshape to (5, 1, 19, 64) (previously was x = x.reshape(x.size(0), 1, 307, 64) and changed for the Kayseri data)
         # print("After reshaping, x size:", x.size())
 
         # Apply log softmax along the appropriate dimension
